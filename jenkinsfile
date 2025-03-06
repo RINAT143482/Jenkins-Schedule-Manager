@@ -15,7 +15,7 @@ pipeline {
                     checkout([
                         $class: 'GitSCM',
                         branches: [[name: '*/main']],
-                        userRemoteConfigs: [[url: 'https://github.com/USERNAME/REPOSITORY.git']]
+                        userRemoteConfigs: [[url: 'https://github.com/RINAT143482/Jenkins-Schedule-Manager.git']]
                     ])
                 }
             }
@@ -25,7 +25,7 @@ pipeline {
             steps {
                 script {
                     echo 'Running PowerShell schedule manager script...'
-                    powershell script: "powershell -ExecutionPolicy Bypass -File .\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT}"
+                    powershell script: "powershell -ExecutionPolicy Bypass -File .\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT}"
                 }
             }
         }
