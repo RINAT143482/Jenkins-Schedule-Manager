@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+    
+    parameters {
+        string(name: 'DAY', defaultValue: 'Monday', description: 'Enter the day of the class')
+        string(name: 'TIME', defaultValue: '10:00', description: 'Enter the time of the class')
+        string(name: 'SUBJECT', defaultValue: 'Math', description: 'Enter the subject of the class')
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    echo 'Checking out the repository...'
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: '*/main']],
+                        userRemoteConfigs: [[url: 'https://github.com/USERNAME/REPOSITORY.git']]
+                    ])
+                }
+            }
+        }
+        
+        stage('Execute PowerShell Script') {
+            steps {
+                script {
+                    echo 'Running PowerShell schedule manager script...'
+                    powershell script: "powershell -ExecutionPolicy Bypass -File .\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT}"
+                }
+            }
+        }
+        
+        stage('Publish HTML Report') {
+            steps {
+                script {
+                    echo 'Publishing HTML output...'
+                    publishHTML(target: [
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'output',
+                        reportFiles: 'schedule.html',
+                        reportName: 'Schedule Report'
+                    ])
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
