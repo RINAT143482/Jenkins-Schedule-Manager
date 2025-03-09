@@ -28,6 +28,7 @@ pipeline {
             steps {
                 script {
                     echo 'Running PowerShell schedule manager script...'
+                    // כאן יש לוודא שהנתיב נכון לקובץ proj.ps1
                     powershell script: ".\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT}"
                 }
             }
