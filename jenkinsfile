@@ -12,7 +12,7 @@ pipeline {
             steps {
                 script {
                     echo 'Checking out the repository...'
-                    checkout([
+                    checkout([ 
                         $class: 'GitSCM',
                         branches: [[name: '*/main']],
                         userRemoteConfigs: [[
@@ -28,7 +28,7 @@ pipeline {
             steps {
                 script {
                     echo 'Running PowerShell schedule manager script...'
-                    powershell script: ".\\jenkins\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT}"
+                    powershell script: ".\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT}"
                 }
             }
         }
