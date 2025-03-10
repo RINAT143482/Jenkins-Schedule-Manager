@@ -1,94 +1,94 @@
-pipeline {  # תחילת הגדרת ה-Pipeline
-    agent any   # הגדרת סוכן (Agent) כללי שיכול להריץ את ה-Pipeline על כל מכונה זמינה
+pipeline {  
+    agent any   
 
-    parameters {  # הגדרת פרמטרים שהמשתמש יכול להזין לפני הרצת ה-Pipeline
-        string(name: 'DAY', defaultValue: 'Monday', description: 'Enter the day of the class') # פרמטר שמאפשר לבחור יום (ברירת מחדל: Monday)
-        string(name: 'TIME', defaultValue: '10:00', description: 'Enter the time of the class') # פרמטר שמאפשר לבחור שעה (ברירת מחדל: 10:00)
-        string(name: 'SUBJECT', defaultValue: 'Math', description: 'Enter the subject of the class') # פרמטר שמאפשר לבחור נושא (ברירת מחדל: Math)
+    parameters {  
+        string(name: 'DAY', defaultValue: 'Monday', description: 'Enter the day of the class') 
+        string(name: 'TIME', defaultValue: '10:00', description: 'Enter the time of the class')
+        string(name: 'SUBJECT', defaultValue: 'Math', description: 'Enter the subject of the class') 
     }
 
-    stages {  # הגדרת שלבי ה-Pipeline
+    stages { 
 
-        stage('Validate Parameters') {  # שלב ראשון: בדיקה שהמשתמש הזין את כל הפרמטרים הדרושים
-            steps {  # פעולות שיבוצעו בשלב זה
-                script {  # בלוק סקריפט להרצת קוד Groovy מתקדם
-                    if (!params.DAY || !params.TIME || !params.SUBJECT) {  # אם אחד מהפרמטרים חסר
-                        error("Missing required parameters: DAY, TIME, or SUBJECT") # ה-Pipeline נכשל עם הודעת שגיאה
+        stage('Validate Parameters') {  
+            steps {  
+                script {  
+                    if (!params.DAY || !params.TIME || !params.SUBJECT) {  
+                        error("Missing required parameters: DAY, TIME, or SUBJECT") 
                     }
-                    echo "Parameters validated: Day=${params.DAY}, Time=${params.TIME}, Subject=${params.SUBJECT}"  # הדפסת הפרמטרים שהוזנו
+                    echo "Parameters validated: Day=${params.DAY}, Time=${params.TIME}, Subject=${params.SUBJECT}"  
                 }
             }
         }
 
-        stage('Checkout') {  # שלב שני: הורדת קוד המקור מ-GitHub
-            steps {  # פעולות שיבוצעו בשלב זה
+        stage('Checkout') {  
+            steps {  
                 script {
-                    echo 'Checking out the repository...'  # הודעה שמתבצע תהליך Checkout
-                    checkout([  # פקודה שמבצעת Clone לקוד מתוך GitHub
-                        $class: 'GitSCM',  # שימוש במנהל ה-Git של Jenkins
-                        branches: [[name: '*/main']],  # בחירת הענף (branch) הראשי main
-                        userRemoteConfigs: [[  # הגדרת חיבור ל-GitHub
-                            url: 'https://github.com/RINAT143482/Jenkins-Schedule-Manager.git',  # כתובת ה-Repository
-                            credentialsId: 'github-creds'  # מזהה האישורים (שמור בתוך Jenkins)
+                    echo 'Checking out the repository...'  
+                    checkout([ 
+                        $class: 'GitSCM',  
+                        branches: [[name: '*/main']],  
+                        userRemoteConfigs: [[ 
+                            url: 'https://github.com/RINAT143482/Jenkins-Schedule-Manager.git',  
+                            credentialsId: 'github-creds'  
                         ]]
                     ])
                 }
             }
         }
 
-        stage('Validate Files') {  # שלב שלישי: בדיקה שקובצי הסקריפט והתיקייה הדרושה קיימים
+        stage('Validate Files') {  
             steps {
                 script {
-                    def filePath = "${env.WORKSPACE}\\proj.ps1"  # שימוש בנתיב יחסי לקובץ ה-PowerShell
-                    if (!fileExists(filePath)) {  # אם הקובץ לא קיים
-                        error("PowerShell script 'proj.ps1' not found at path: ${filePath}")  # הצגת הודעת שגיאה
+                    def filePath = "${env.WORKSPACE}\\proj.ps1"  
+                    if (!fileExists(filePath)) {  
+                        error("PowerShell script 'proj.ps1' not found at path: ${filePath}") 
                     }
 
-                    def outputDir = "${env.WORKSPACE}\\output"  # שימוש בנתיב יחסי לתיקיית הפלט
-                    if (!fileExists(outputDir)) {  # אם התיקייה לא קיימת
-                        error("Output directory not found: ${outputDir}")  # הצגת הודעת שגיאה
+                    def outputDir = "${env.WORKSPACE}\\output" 
+                    if (!fileExists(outputDir)) { 
+                        error("Output directory not found: ${outputDir}") 
                     }
                 }
             }
         }
 
-        stage('Execute PowerShell Script') {  # שלב רביעי: הרצת סקריפט PowerShell
+        stage('Execute PowerShell Script') { 
             steps {
                 script {
-                    echo 'Running PowerShell schedule manager script...'  # הדפסת הודעה לפני הרצת הסקריפט
-                    powershell script: """  # הפקודה שמריצה את הסקריפט
-                        ${env.WORKSPACE}\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT}  # הרצת קובץ ה-PowerShell עם הפרמטרים שהוזנו
-                        Write-Output "======= Schedule HTML Output ======="  # הדפסת כותרת לפלט
-                        Get-Content "${env.WORKSPACE}\\schedule.html"  # קריאה והצגה של תוכן קובץ ה-HTML שנוצר
-                        Write-Output "===================================="  # הדפסת סיום הפלט
+                    echo 'Running PowerShell schedule manager script...'  
+                    powershell script: """  
+                        ${env.WORKSPACE}\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT} 
+                        Write-Output "======= Schedule HTML Output ======="  
+                        Get-Content "${env.WORKSPACE}\\schedule.html"  
+                        Write-Output "====================================" 
                     """
                 }
             }
         }
 
-        stage('Publish HTML Report') {  # שלב חמישי: פרסום דוח HTML שנוצר
+        stage('Publish HTML Report') { 
             steps {
                 script {
-                    echo 'Publishing HTML output...'  # הדפסת הודעה לפני הפרסום
-                    publishHTML(target: [  # פקודה שמפרסמת את הדוח ב-Jenkins
-                        allowMissing: false,  # אם הקובץ לא נמצא, ה-Pipeline ייכשל
-                        alwaysLinkToLastBuild: true,  # קישור תמידי לגרסה האחרונה של הדוח
-                        keepAll: true,  # שמירת כל ההרצות של הדוח
-                        reportDir: "${env.WORKSPACE}",  # הנתיב שבו נמצא הדוח
-                        reportFiles: 'schedule.html',  # שם קובץ ה-HTML שצריך לפרסם
-                        reportName: 'Schedule Report'  # שם הדוח כפי שיופיע ב-Jenkins
+                    echo 'Publishing HTML output...'  
+                    publishHTML(target: [  
+                        allowMissing: false, 
+                        alwaysLinkToLastBuild: true, 
+                        keepAll: true, 
+                        reportDir: "${env.WORKSPACE}", 
+                        reportFiles: 'schedule.html',  
+                        reportName: 'Schedule Report'  
                     ])
                 }
             }
         }
     }
 
-    post {  # פעולות שיבוצעו בסיום ה-Pipeline
-        success {  # במקרה של הצלחה
-            echo 'Pipeline completed successfully!'  # הדפסת הודעה על סיום מוצלח
+    post {  
+        success { 
+            echo 'Pipeline completed successfully!' 
         }
-        failure {  # במקרה של כישלון
-            echo 'Pipeline failed!'  # הדפסת הודעת כישלון
+        failure { 
+            echo 'Pipeline failed!' 
         }
     }
 }
