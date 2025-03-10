@@ -24,13 +24,13 @@ pipeline {
             steps {  
                 script {
                     echo 'Checking out the repository...'  
-                    checkout([ 
-                        $class: 'GitSCM',  
+                    checkout([$class: 'GitSCM',  
                         branches: [[name: '*/main']],  
                         userRemoteConfigs: [[ 
                             url: 'https://github.com/RINAT143482/Jenkins-Schedule-Manager.git',  
                             credentialsId: 'github-creds'  
-                        ]])
+                        ]]
+                    ])
                 }
             }
         }
@@ -87,7 +87,7 @@ pipeline {
                 }
             }
         }
-    }  // <-- כאן הסוגר הנכון של stages
+    }
 
     post {  
         success { 
