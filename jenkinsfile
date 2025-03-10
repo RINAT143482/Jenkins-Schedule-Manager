@@ -30,8 +30,7 @@ pipeline {
                         userRemoteConfigs: [[ 
                             url: 'https://github.com/RINAT143482/Jenkins-Schedule-Manager.git',  
                             credentialsId: 'github-creds'  
-                        ]]
-                    ])
+                        ]])
                 }
             }
         }
