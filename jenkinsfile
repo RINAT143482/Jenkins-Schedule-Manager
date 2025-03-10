@@ -68,18 +68,28 @@ pipeline {
         stage('Publish HTML Report') { 
     steps {
         script {
-            echo 'Publishing HTML output...'  
+            echo 'Publishing HTML output...'
+            
+            
+            bat '''
+                if not exist "${env.WORKSPACE}\\output" (
+                    mkdir "${env.WORKSPACE}\\output"
+                )
+            '''
+            
+            
             publishHTML(target: [  
                 allowMissing: false, 
                 alwaysLinkToLastBuild: true, 
                 keepAll: true, 
-                reportDir: 'C:\\Users\\rinat\\Desktop\\jenkis\\output',  
+                reportDir: "${env.WORKSPACE}\\output",  
                 reportFiles: 'schedule.html',  
                 reportName: 'Schedule Report'  
             ])
         }
     }
 }
+
 
 
     post {  
