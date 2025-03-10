@@ -66,21 +66,21 @@ pipeline {
         }
 
         stage('Publish HTML Report') { 
-            steps {
-                script {
-                    echo 'Publishing HTML output...'  
-                    publishHTML(target: [  
-                        allowMissing: false, 
-                        alwaysLinkToLastBuild: true, 
-                        keepAll: true, 
-                        reportDir: "${env.WORKSPACE}", 
-                        reportFiles: 'schedule.html',  
-                        reportName: 'Schedule Report'  
-                    ])
-                }
-            }
+    steps {
+        script {
+            echo 'Publishing HTML output...'  
+            publishHTML(target: [  
+                allowMissing: false, 
+                alwaysLinkToLastBuild: true, 
+                keepAll: true, 
+                reportDir: 'C:\\Users\\rinat\\Desktop\\jenkis\\output',  
+                reportFiles: 'schedule.html',  
+                reportName: 'Schedule Report'  
+            ])
         }
     }
+}
+
 
     post {  
         success { 
