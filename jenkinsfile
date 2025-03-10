@@ -39,12 +39,12 @@ pipeline {  // תחילת הגדרת ה-Pipeline
         stage('Validate Files') {  // שלב שלישי: בדיקה שקובצי הסקריפט והתיקייה הדרושה קיימים
             steps {
                 script {
-                    def filePath = "C:\\Users\\rinat\\Desktop\\jenkis\\proj.ps1"  // הגדרת נתיב קובץ ה-PowerShell
+                    def filePath = "${env.WORKSPACE}\\proj.ps1"  // שימוש בנתיב יחסי לקובץ ה-PowerShell
                     if (!fileExists(filePath)) {  // אם הקובץ לא קיים
                         error("PowerShell script 'proj.ps1' not found at path: ${filePath}")  // הצגת הודעת שגיאה
                     }
 
-                    def outputDir = "C:\\Users\\rinat\\Desktop\\jenkis"  // הגדרת נתיב תיקיית הפלט
+                    def outputDir = "${env.WORKSPACE}\\output"  // שימוש בנתיב יחסי לתיקיית הפלט
                     if (!fileExists(outputDir)) {  // אם התיקייה לא קיימת
                         error("Output directory not found: ${outputDir}")  // הצגת הודעת שגיאה
                     }
@@ -57,9 +57,9 @@ pipeline {  // תחילת הגדרת ה-Pipeline
                 script {
                     echo 'Running PowerShell schedule manager script...'  // הדפסת הודעה לפני הרצת הסקריפט
                     powershell script: """  // הפקודה שמריצה את הסקריפט
-                        C:\\Users\\rinat\\Desktop\\jenkis\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT}  // הרצת קובץ ה-PowerShell עם הפרמטרים שהוזנו
+                        ${env.WORKSPACE}\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT}  // הרצת קובץ ה-PowerShell עם הפרמטרים שהוזנו
                         Write-Output "======= Schedule HTML Output ======="  // הדפסת כותרת לפלט
-                        Get-Content "C:\\Users\\rinat\\Desktop\\jenkis\\schedule.html"  // קריאה והצגה של תוכן קובץ ה-HTML שנוצר
+                        Get-Content "${env.WORKSPACE}\\schedule.html"  // קריאה והצגה של תוכן קובץ ה-HTML שנוצר
                         Write-Output "===================================="  // הדפסת סיום הפלט
                     """
                 }
@@ -74,7 +74,7 @@ pipeline {  // תחילת הגדרת ה-Pipeline
                         allowMissing: false,  // אם הקובץ לא נמצא, ה-Pipeline ייכשל
                         alwaysLinkToLastBuild: true,  // קישור תמידי לגרסה האחרונה של הדוח
                         keepAll: true,  // שמירת כל ההרצות של הדוח
-                        reportDir: 'C:\\Users\\rinat\\Desktop\\jenkis',  // הנתיב שבו נמצא הדוח
+                        reportDir: "${env.WORKSPACE}",  // הנתיב שבו נמצא הדוח
                         reportFiles: 'schedule.html',  // שם קובץ ה-HTML שצריך לפרסם
                         reportName: 'Schedule Report'  // שם הדוח כפי שיופיע ב-Jenkins
                     ])
