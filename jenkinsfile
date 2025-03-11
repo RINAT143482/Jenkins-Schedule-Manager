@@ -7,10 +7,6 @@ pipeline {
         string(name: 'SUBJECT', defaultValue: 'Math', description: 'Enter the subject of the class') 
     }
 
-    environment {
-        OUTPUT_DIR = "C:\\Users\\rinat\\Desktop\\jenkis\\output"
-    }
-
     stages { 
 
         stage('Validate Parameters') {  
@@ -28,7 +24,8 @@ pipeline {
             steps {  
                 script {
                     echo 'Checking out the repository...'  
-                    checkout([$class: 'GitSCM',  
+                    checkout([ 
+                        $class: 'GitSCM',  
                         branches: [[name: '*/main']],  
                         userRemoteConfigs: [[ 
                             url: 'https://github.com/RINAT143482/Jenkins-Schedule-Manager.git',  
@@ -46,29 +43,10 @@ pipeline {
                         error("PowerShell script 'proj.ps1' not found at path: ${filePath}") 
                     }
 
-                    if (!fileExists(env.OUTPUT_DIR)) { 
-                        error("Output directory not found: ${env.OUTPUT_DIR}") 
+                    def outputDir = "${env.WORKSPACE}\\output" 
+                    if (!fileExists(outputDir)) { 
+                        error("Output directory not found: ${outputDir}") 
                     }
-                }
-            }
-        }
-
-        stage('Check Write Permissions') {
-            steps {
-                script {
-                    echo 'Checking write permissions to output folder...'
-                    powershell script: """
-                        \$outputDir = '${env.OUTPUT_DIR}'
-                        \$testFilePath = '\$outputDir\\test_write_permission.txt'
-
-                        if (!(Test-Path -Path \$outputDir)) {
-                            New-Item -Path \$outputDir -ItemType Directory -Force
-                            Write-Host 'Created output directory'
-                        }
-
-                        New-Item -Path \$testFilePath -ItemType File -Force
-                        Write-Host 'File created successfully at: \$testFilePath'
-                    """
                 }
             }
         }
@@ -78,11 +56,10 @@ pipeline {
                 script {
                     echo 'Running PowerShell schedule manager script...'  
                     powershell script: """  
-                        \$scriptPath = '${env.WORKSPACE}\\proj.ps1'
-                        & \$scriptPath -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT}
-                        Write-Output '======= Schedule HTML Output ======='  
-                        Get-Content '\${env.OUTPUT_DIR}\\schedule.html'  
-                        Write-Output '====================================' 
+                        ${env.WORKSPACE}\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT} 
+                        Write-Output "======= Schedule HTML Output ======="  
+                        Get-Content "${env.WORKSPACE}\\schedule.html"  
+                        Write-Output "====================================" 
                     """
                 }
             }
@@ -91,19 +68,12 @@ pipeline {
         stage('Publish HTML Report') { 
             steps {
                 script {
-                    echo 'Publishing HTML output...'
-                    
-                    bat '''
-                        if not exist "%OUTPUT_DIR%" (
-                            mkdir "%OUTPUT_DIR%"
-                        )
-                    '''
-                    
+                    echo 'Publishing HTML output...'  
                     publishHTML(target: [  
                         allowMissing: false, 
                         alwaysLinkToLastBuild: true, 
                         keepAll: true, 
-                        reportDir: "%OUTPUT_DIR%",  
+                        reportDir: "${env.WORKSPACE}", 
                         reportFiles: 'schedule.html',  
                         reportName: 'Schedule Report'  
                     ])
@@ -115,6 +85,7 @@ pipeline {
     post {  
         success { 
             echo 'Pipeline completed successfully!' 
+            echo "You can view the output report here: ${env.BUILD_URL}artifact/schedule.html"
         }
         failure { 
             echo 'Pipeline failed!' 
