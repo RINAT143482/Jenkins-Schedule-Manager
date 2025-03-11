@@ -7,6 +7,10 @@ pipeline {
         string(name: 'SUBJECT', defaultValue: 'Math', description: 'Enter the subject of the class') 
     }
 
+    environment {
+        OUTPUT_DIR = "C:\\Users\\rinat\\Desktop\\jenkis\\output" // תיקון הנתיב
+    }
+
     stages { 
 
         stage('Validate Parameters') {  
@@ -43,9 +47,8 @@ pipeline {
                         error("PowerShell script 'proj.ps1' not found at path: ${filePath}") 
                     }
 
-                    def outputDir = "${env.WORKSPACE}\\output" 
-                    if (!fileExists(outputDir)) { 
-                        error("Output directory not found: ${outputDir}") 
+                    if (!fileExists(env.OUTPUT_DIR)) { 
+                        error("Output directory not found: ${env.OUTPUT_DIR}") 
                     }
                 }
             }
@@ -56,11 +59,11 @@ pipeline {
                 script {
                     echo 'Checking write permissions to output folder...'
                     powershell script: """
-                        $outputDir = "${env.WORKSPACE}\\output"
+                        $outputDir = "${env.OUTPUT_DIR}"
                         $testFilePath = "$outputDir\\test_write_permission.txt"
 
                         if (!(Test-Path -Path $outputDir)) {
-                            New-Item -Path $outputDir -ItemType Directory
+                            New-Item -Path $outputDir -ItemType Directory -Force
                             Write-Host "Created output directory"
                         }
 
@@ -78,7 +81,7 @@ pipeline {
                     powershell script: """  
                         ${env.WORKSPACE}\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT} 
                         Write-Output "======= Schedule HTML Output ======="  
-                        Get-Content "${env.WORKSPACE}\\schedule.html"  
+                        Get-Content "${env.OUTPUT_DIR}\\schedule.html"  
                         Write-Output "====================================" 
                     """
                 }
@@ -91,8 +94,8 @@ pipeline {
                     echo 'Publishing HTML output...'
                     
                     bat '''
-                        if not exist "${env.WORKSPACE}\\output" (
-                            mkdir "${env.WORKSPACE}\\output"
+                        if not exist "${env.OUTPUT_DIR}" (
+                            mkdir "${env.OUTPUT_DIR}"
                         )
                     '''
                     
@@ -100,7 +103,7 @@ pipeline {
                         allowMissing: false, 
                         alwaysLinkToLastBuild: true, 
                         keepAll: true, 
-                        reportDir: "${env.WORKSPACE}\\output",  
+                        reportDir: "${env.OUTPUT_DIR}",  
                         reportFiles: 'schedule.html',  
                         reportName: 'Schedule Report'  
                     ])
