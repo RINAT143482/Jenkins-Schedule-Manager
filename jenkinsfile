@@ -29,8 +29,7 @@ pipeline {
                         userRemoteConfigs: [[ 
                             url: 'https://github.com/RINAT143482/Jenkins-Schedule-Manager.git',  
                             credentialsId: 'github-creds'  
-                        ]]
-                    ])
+                        ]])
                 }
             }
         }
@@ -47,6 +46,26 @@ pipeline {
                     if (!fileExists(outputDir)) { 
                         error("Output directory not found: ${outputDir}") 
                     }
+                }
+            }
+        }
+
+        stage('Check Write Permissions') {
+            steps {
+                script {
+                    echo 'Checking write permissions to output folder...'
+                    powershell script: """
+                        $outputDir = "${env.WORKSPACE}\\output"
+                        $testFilePath = "$outputDir\\test_write_permission.txt"
+
+                        if (!(Test-Path -Path $outputDir)) {
+                            New-Item -Path $outputDir -ItemType Directory
+                            Write-Host "Created output directory"
+                        }
+
+                        New-Item -Path $testFilePath -ItemType File -Force
+                        Write-Host "File created successfully at: $testFilePath"
+                    """
                 }
             }
         }
@@ -98,3 +117,4 @@ pipeline {
         }
     }
 }
+git add .
