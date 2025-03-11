@@ -33,8 +33,7 @@ pipeline {
                         userRemoteConfigs: [[ 
                             url: 'https://github.com/RINAT143482/Jenkins-Schedule-Manager.git',  
                             credentialsId: 'github-creds'  
-                        ]]
-                    ])
+                        ]])
                 }
             }
         }
@@ -58,18 +57,18 @@ pipeline {
             steps {
                 script {
                     echo 'Checking write permissions to output folder...'
-                    powershell script: '''
-                        $outputDir = "${env.OUTPUT_DIR}"
-                        $testFilePath = "$outputDir\\test_write_permission.txt"
+                    powershell script: """
+                        \$outputDir = '${env.OUTPUT_DIR}'
+                        \$testFilePath = '\$outputDir\\test_write_permission.txt'
 
-                        if (!(Test-Path -Path $outputDir)) {
-                            New-Item -Path $outputDir -ItemType Directory -Force
-                            Write-Host "Created output directory"
+                        if (!(Test-Path -Path \$outputDir)) {
+                            New-Item -Path \$outputDir -ItemType Directory -Force
+                            Write-Host 'Created output directory'
                         }
 
-                        New-Item -Path $testFilePath -ItemType File -Force
-                        Write-Host "File created successfully at: $testFilePath"
-                    '''
+                        New-Item -Path \$testFilePath -ItemType File -Force
+                        Write-Host 'File created successfully at: \$testFilePath'
+                    """
                 }
             }
         }
@@ -78,13 +77,13 @@ pipeline {
             steps {
                 script {
                     echo 'Running PowerShell schedule manager script...'  
-                    powershell script: '''  
-                        $scriptPath = "${env.WORKSPACE}\\proj.ps1"
-                        & $scriptPath -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT}
-                        Write-Output "======= Schedule HTML Output ======="  
-                        Get-Content "${env.OUTPUT_DIR}\\schedule.html"  
-                        Write-Output "====================================" 
-                    '''
+                    powershell script: """  
+                        \$scriptPath = '${env.WORKSPACE}\\proj.ps1'
+                        & \$scriptPath -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT}
+                        Write-Output '======= Schedule HTML Output ======='  
+                        Get-Content '\${env.OUTPUT_DIR}\\schedule.html'  
+                        Write-Output '====================================' 
+                    """
                 }
             }
         }
