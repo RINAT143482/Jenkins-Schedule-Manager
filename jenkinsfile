@@ -1,88 +1,85 @@
-pipeline {  
-    agent any   
+pipeline {
+    agent any
 
-    parameters {  
-        string(name: 'DAY', defaultValue: 'Monday', description: 'Enter the day of the class') 
-        string(name: 'TIME', defaultValue: '10:00', description: 'Enter the time of the class')
-        string(name: 'SUBJECT', defaultValue: 'Math', description: 'Enter the subject of the class') 
+    parameters {
+        string(name: 'Day', defaultValue: 'Monday', description: 'Day of the class')
+        string(name: 'Time', defaultValue: '10:00', description: 'Time of the class')
+        string(name: 'Subject', defaultValue: 'Math', description: 'Subject of the class')
     }
 
-    stages { 
-
-        stage('Validate Parameters') {  
-            steps {  
-                script {  
-                    if (!params.DAY || !params.TIME || !params.SUBJECT) {  
-                        error("Missing required parameters: DAY, TIME, or SUBJECT") 
-                    }
-                    echo "Parameters validated: Day=${params.DAY}, Time=${params.TIME}, Subject=${params.SUBJECT}"  
+    stages {
+        stage('Validate Parameters') {
+            steps {
+                script {
+                    echo "Parameters validated: Day=${params.Day}, Time=${params.Time}, Subject=${params.Subject}"
                 }
             }
         }
 
-        stage('Checkout') {  
-            steps {  
+        stage('Checkout') {
+            steps {
                 script {
-                    echo 'Checking out the repository...'  
+                    echo 'Checking out the repository...'
                     checkout scm
                 }
             }
         }
 
-        stage('Validate Files') {  
+        stage('Validate Files') {
             steps {
                 script {
-                    def filePath = "${env.WORKSPACE}\\proj.ps1"  
-                    if (!fileExists(filePath)) {  
-                        error("PowerShell script 'proj.ps1' not found at path: ${filePath}") 
-                    }
-
-                    def outputDir = "${env.WORKSPACE}\\output" 
-                    if (!fileExists(outputDir)) { 
-                        error("Output directory not found: ${outputDir}") 
+                    if (fileExists('schedule.ps1')) {
+                        echo 'Schedule PowerShell script exists.'
+                    } else {
+                        error 'Schedule PowerShell script not found!'
                     }
                 }
             }
         }
 
-        stage('Execute PowerShell Script') { 
+        stage('Execute PowerShell Script') {
             steps {
                 script {
-                    echo 'Running PowerShell schedule manager script...'  
-                    powershell script: """  
-                        ${env.WORKSPACE}\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT} 
-                        Write-Output "======= Schedule HTML Output ======="  
-                        Get-Content "${env.WORKSPACE}\\schedule.html"  
-                        Write-Output "====================================" 
-                    """
+                    echo 'Running PowerShell schedule manager script...'
+                    bat 'powershell -NoProfile -ExecutionPolicy Bypass -File "schedule.ps1"'
                 }
             }
         }
 
-        stage('Publish HTML Report') { 
+        stage('Publish HTML Report') {
             steps {
                 script {
-                    echo 'Publishing HTML output...'  
-                    publishHTML(target: [  
-                        allowMissing: false, 
-                        alwaysLinkToLastBuild: true, 
-                        keepAll: true, 
-                        reportDir: "${env.WORKSPACE}", 
-                        reportFiles: 'schedule.html',  
-                        reportName: 'Schedule Report'  
+                    echo 'Publishing HTML output...'
+                    if (!fileExists("${env.WORKSPACE}\\output")) {
+                        bat "mkdir ${env.WORKSPACE}\\output"
+                    }
+                    publishHTML([
+                        allowMissing: false,
+                        keepAll: true,
+                        reportDir: 'output',
+                        reportFiles: 'schedule.html',
+                        reportName: 'Schedule Report'
                     ])
                 }
             }
         }
     }
 
-    post {  
-        success { 
-            echo 'Pipeline completed successfully!' 
-            echo "You can view the output report here: ${env.BUILD_URL}artifact/schedule.html"
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+            script {
+                def outputPath = "${env.WORKSPACE}\\output\\schedule.html"
+                if (fileExists(outputPath)) {
+                    echo "Access the schedule here: file://${outputPath}"
+                } else {
+                    echo "Output HTML file not found."
+                }
+            }
         }
-        failure { 
-            echo 'Pipeline failed!' 
+
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
