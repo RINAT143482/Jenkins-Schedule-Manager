@@ -8,7 +8,7 @@ pipeline {
     }
 
     environment {
-        OUTPUT_DIR = "C:\\Users\\rinat\\Desktop\\jenkis\\output" // תיקון הנתיב
+        OUTPUT_DIR = "C:\\Users\\rinat\\Desktop\\jenkis\\output"
     }
 
     stages { 
@@ -33,7 +33,7 @@ pipeline {
                         userRemoteConfigs: [[ 
                             url: 'https://github.com/RINAT143482/Jenkins-Schedule-Manager.git',  
                             credentialsId: 'github-creds'  
-                        ]]
+                        ]]]
                     ])
                 }
             }
@@ -58,7 +58,7 @@ pipeline {
             steps {
                 script {
                     echo 'Checking write permissions to output folder...'
-                    powershell script: """
+                    powershell script: '''
                         $outputDir = "${env.OUTPUT_DIR}"
                         $testFilePath = "$outputDir\\test_write_permission.txt"
 
@@ -69,7 +69,7 @@ pipeline {
 
                         New-Item -Path $testFilePath -ItemType File -Force
                         Write-Host "File created successfully at: $testFilePath"
-                    """
+                    '''
                 }
             }
         }
@@ -78,12 +78,13 @@ pipeline {
             steps {
                 script {
                     echo 'Running PowerShell schedule manager script...'  
-                    powershell script: """  
-                        ${env.WORKSPACE}\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT} 
+                    powershell script: '''  
+                        $scriptPath = "${env.WORKSPACE}\\proj.ps1"
+                        & $scriptPath -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT}
                         Write-Output "======= Schedule HTML Output ======="  
                         Get-Content "${env.OUTPUT_DIR}\\schedule.html"  
                         Write-Output "====================================" 
-                    """
+                    '''
                 }
             }
         }
@@ -94,8 +95,8 @@ pipeline {
                     echo 'Publishing HTML output...'
                     
                     bat '''
-                        if not exist "${env.OUTPUT_DIR}" (
-                            mkdir "${env.OUTPUT_DIR}"
+                        if not exist "%OUTPUT_DIR%" (
+                            mkdir "%OUTPUT_DIR%"
                         )
                     '''
                     
@@ -103,7 +104,7 @@ pipeline {
                         allowMissing: false, 
                         alwaysLinkToLastBuild: true, 
                         keepAll: true, 
-                        reportDir: "${env.OUTPUT_DIR}",  
+                        reportDir: "%OUTPUT_DIR%",  
                         reportFiles: 'schedule.html',  
                         reportName: 'Schedule Report'  
                     ])
