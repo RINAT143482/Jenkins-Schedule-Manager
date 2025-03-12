@@ -30,8 +30,7 @@ pipeline {
                         userRemoteConfigs: [[ 
                             url: 'https://github.com/RINAT143482/Jenkins-Schedule-Manager.git',  
                             credentialsId: 'github-creds'  
-                        ]]
-                    ])
+                        ]])
                 }
             }
         }
@@ -59,7 +58,7 @@ pipeline {
                     powershell script: """  
                         ${env.WORKSPACE}\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT} 
                         Write-Output "======= Schedule HTML Output ======="  
-                        Get-Content "${env.WORKSPACE}\\schedule.html"  
+                        Get-Content "${env.WORKSPACE}\\output\\schedule.html"  
                         Write-Output "====================================" 
                     """
                 }
@@ -74,7 +73,7 @@ pipeline {
                         allowMissing: false, 
                         alwaysLinkToLastBuild: true, 
                         keepAll: true, 
-                        reportDir: "${env.WORKSPACE}", 
+                        reportDir: "${env.WORKSPACE}/output", 
                         reportFiles: 'schedule.html',  
                         reportName: 'Schedule Report'  
                     ])
@@ -86,7 +85,7 @@ pipeline {
     post {  
         success { 
             echo 'Pipeline completed successfully!' 
-            echo "Schedule Report is available at: ${JENKINS_URL}job/${JOB_NAME}/${BUILD_NUMBER}/HTML_20Report/"  
+            echo "Schedule Report is available at: ${env.JENKINS_URL}job/${env.JOB_NAME}/${env.BUILD_NUMBER}/Schedule_20Report/"
         }
         failure { 
             echo 'Pipeline failed!' 
