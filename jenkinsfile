@@ -30,8 +30,7 @@ pipeline {
                         userRemoteConfigs: [[ 
                             url: 'https://github.com/RINAT143482/Jenkins-Schedule-Manager.git',  
                             credentialsId: 'github-creds'  
-                        ]]
-                    ])
+                        ]])
                 }
             }
         }
@@ -59,7 +58,7 @@ pipeline {
                     powershell script: """  
                         ${env.WORKSPACE}\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT} 
                         Write-Output "======= Schedule HTML Output ======="  
-                        Get-Content "${env.WORKSPACE}\\schedule.html"  
+                        Get-Content "${env.WORKSPACE}\\output\\schedule.html"  # עדכון לנתיב החדש
                         Write-Output "====================================" 
                     """
                 }
@@ -74,7 +73,7 @@ pipeline {
                         allowMissing: false, 
                         alwaysLinkToLastBuild: true, 
                         keepAll: true, 
-                        reportDir: "${env.WORKSPACE}", 
+                        reportDir: "${env.WORKSPACE}\\output",  # עדכון לנתיב החדש
                         reportFiles: 'schedule.html',  
                         reportName: 'Schedule Report'  
                     ])
@@ -91,4 +90,4 @@ pipeline {
             echo 'Pipeline failed!' 
         }
     }
-}   
+}
