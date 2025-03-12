@@ -59,7 +59,7 @@ pipeline {
                     powershell script: """  
                         ${env.WORKSPACE}\\proj.ps1 -Day ${params.DAY} -Time ${params.TIME} -Subject ${params.SUBJECT} 
                         Write-Output "======= Schedule HTML Output ======="  
-                        Get-Content "${env.WORKSPACE}\\output\\schedule.html"  # עדכון לנתיב החדש
+                        Get-Content "${env.WORKSPACE}\\output\\schedule.html"  
                         Write-Output "====================================" 
                     """
                 }
@@ -74,7 +74,7 @@ pipeline {
                         allowMissing: false, 
                         alwaysLinkToLastBuild: true, 
                         keepAll: true, 
-                        reportDir: "${env.WORKSPACE}\\output",  # עדכון לנתיב החדש
+                        reportDir: "${env.WORKSPACE}\\output",  
                         reportFiles: 'schedule.html',  
                         reportName: 'Schedule Report'  
                     ])
