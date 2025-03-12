@@ -30,7 +30,8 @@ pipeline {
                         userRemoteConfigs: [[ 
                             url: 'https://github.com/RINAT143482/Jenkins-Schedule-Manager.git',  
                             credentialsId: 'github-creds'  
-                        ]])
+                        ]]
+                    ])
                 }
             }
         }
@@ -85,9 +86,10 @@ pipeline {
     post {  
         success { 
             echo 'Pipeline completed successfully!' 
+            echo "Schedule Report is available at: ${JENKINS_URL}job/${JOB_NAME}/${BUILD_NUMBER}/HTML_20Report/"  
         }
         failure { 
             echo 'Pipeline failed!' 
         }
     }
-} 
+}  
